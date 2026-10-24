@@ -1,0 +1,33 @@
+name: deploy-aws-lambda
+
+# Assumes the Lambda function already exists (created once via console/CLI/IaC) — this
+# workflow only pushes new code to it. Requires AWS credentials with lambda:UpdateFunctionCode
+# and a AWS_LAMBDA_FUNCTION_NAME repo variable.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Prune to production dependencies
+        run: pnpm install --prod --frozen-lockfile --ignore-scripts
+      - name: Package function
+        run: |
+          cp -r node_modules dist/node_modules
+          cd dist && zip -r ../function.zip .
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - run: aws lambda update-function-code --function-name "${{ vars.AWS_LAMBDA_FUNCTION_NAME }}" --zip-file fileb://function.zip

@@ -1,0 +1,32 @@
+{
+  "name": "hookvault",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A prototype webhook receiver with signature verification, idempotency, retries, and a dead-letter queue.",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test --import tsx/esm src/logic/hooks.test.ts 2>/dev/null || tsc -p tsconfig.json --noEmit",
+    "deploy:cloudflare": "wrangler deploy",
+    "postinstall": "sigmap",
+    "map:refresh": "sigmap",
+    "map:report": "sigmap --report --json",
+    "map:watch": "sigmap daemon start",
+    "map:setup": "sigmap --setup"
+  },
+  "dependencies": {
+    "hono": "^4.12.30",
+    "@hono/node-server": "^1.19.14"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260717.1",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.23.1",
+    "typescript": "^5.9.0",
+    "wrangler": "^4.112.0",
+    "sigmap": "^8.18.0"
+  }
+}

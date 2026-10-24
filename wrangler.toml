@@ -1,0 +1,3 @@
+name = "hookvault"
+main = "src/adapters/cloudflare-workers.ts"
+compatibility_date = "2026-01-01"

@@ -1,0 +1,23 @@
+name: deploy-gcp-cloud-run
+
+# Deploys the same Dockerfile every other "run this as a container" target in this wrapper
+# uses (iot-edge-gateway) — Cloud Run just needs a container listening on $PORT. Requires a
+# GCP service account key and a GCP_PROJECT_ID repo variable.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+      - uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ github.event.repository.name }}
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          source: .
+          region: ${{ vars.GCP_REGION }}

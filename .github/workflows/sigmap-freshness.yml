@@ -1,0 +1,29 @@
+name: sigmap-freshness
+
+on:
+  pull_request:
+
+jobs:
+  sigmap-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Generate context diff vs base branch
+        run: npx sigmap --diff "origin/${{ github.event.pull_request.base.ref }}" --track
+      - name: Enforce token budget
+        run: npx sigmap --report --json
+      - name: Verify PR description grounding
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if [ -z "$PR_BODY" ]; then
+            echo "Empty PR description — skipping grounding check."
+          else
+            printf '%s' "$PR_BODY" > pr-description.md
+            npx sigmap verify pr-description.md --json
+          fi

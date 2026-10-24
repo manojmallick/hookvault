@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "sigmap": {
+      "command": "npx",
+      "args": [
+        "sigmap",
+        "--mcp"
+      ]
+    }
+  }
+}
